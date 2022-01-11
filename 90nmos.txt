@@ -1,0 +1,68 @@
+go athena
+
+line x loc=0 spac=0.005
+line x loc=0.005 spac=0.01
+line x loc=0.02 spac=0.01
+line x loc=0.08 spac=0.01
+line x loc=0.1 spac=0.01
+line y loc=0 spac=0.001
+line y loc=0.06 spac=0.001
+line y loc=0.07 spac=0.05
+line y loc = 0.15 spac=0.07
+line y loc=0.2 spac=0.1
+
+init silicon c.boron=1e14 orientation=100 two.d
+
+implant boron dose=5e12 energy=4 crystal
+deposit oxide thick=0.002 divisions=10
+
+deposit polysilicon thick=0.1 divisions=5
+implant phosphor dose=5e13 energy=1.8 crystal
+etch polysilicon left p1.x=0.078
+method fermi compress
+diffus time=0.05 temp=900 weto2 press=1
+
+implant arsenic dose=3e13 energy=2 tilt=0 rotation=0 amorph
+
+deposit oxide thick=0.02 divisions=10
+etch oxide dry thick=0.02
+
+implant arsenic dose=1e16 energy=10 tilt=0 rotation=0 amorph
+
+diffus time=0.05 temp=1000 nitro press=1
+
+
+etch oxide dry thick=0.007
+deposit titanium thick=0.01 divisions=5
+diffus time=1 temp=700 nitro press=1
+strip titanium
+
+deposit aluminum thick=0.01 divisions=1
+etch aluminum above p1.y=-0.01
+
+deposit nitride thick=0.01 divisions=5
+struct mirror right
+
+extract start material="Polysilicon" mat.occno=1 bias=0.0 bias.step=0.10 bias.stop=3.0 x.val=0.1
+extract cont interface.occno=2 qss=1.0e10 
+extract done name="curve_vt" xintercept(maxslope(curve(bias,1dn.conduct material = "Silicon" mat.occno=1 x.val=0.1 region.occno=1))) outfile="extract.dat"
+extract name="Tox" thickness oxide mat.occno=1 x.val=0.1
+
+electrode name=source x=0.03
+electrode name=drain x=0.17
+electrode name=gate x=0.1 y=-0.05
+electrode name=backside backside
+
+#
+extract name="nxj" xj material="Silicon" mat.occno=1 x.val=0.05 junc.occno=1
+
+#
+extract name="ldd sheet res" sheet.res material="Silicon" mat.occno=1 x.val=0.08 region.occno=1
+
+#
+extract name="1dvt" 1dvt ntype bias=2 bias.step=0.25 bias.stop=5.0 qss=1e10 x.val=0.1
+
+struct outfile=90nmos.str
+
+tonyplot 90nmos.str
+
